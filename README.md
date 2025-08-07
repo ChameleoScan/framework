@@ -4,7 +4,7 @@
 
 ## Our paper
 
-**ChameleoScan: Demystifying and Detecting Collusion-Based iOS Chameleon Apps via LLM-Empowered UI Exploration**
+**ChameleoScan: Demystifying and Detecting iOS Chameleon Apps via LLM-Powered UI Exploration**
 
 
 
@@ -43,7 +43,7 @@
 
 #### Hardware
 
-1. A **Jailbroken** **iPhone** device with **iOS version 14.x**
+1. A **Jailbroken** **iPhone** device with **iOS version 14.x** (not necessarily)
 
 2. A **macOS** PC to build **WebAgentDriver**
 3. A preferably **Windows** PC to **run the framework**
