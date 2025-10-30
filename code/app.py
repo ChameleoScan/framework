@@ -512,7 +512,8 @@ def test_app(uninstall_first: bool = True, uninstall_then: bool = True):
             logger.warning(f"Failed to fetch app comments for {APP_IDENT} after 3 attempts")
             app_comments = []
         logger.info(f"Found {len(app_comments)} comments for {APP_IDENT}")
-        if len(app_comments) == 0 or not APPID:
+        #if len(app_comments) == 0 or not APPID:
+        if False: # even if no comments, it can still infer
             logger.warning(f"No comments found for {APP_IDENT}, using default task.")
             TASK = [(DEFAULT_TASK, ROUND_DEFAULT_TIMEOUT)]
         else:

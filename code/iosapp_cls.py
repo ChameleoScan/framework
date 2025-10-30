@@ -64,6 +64,14 @@ def query_appinfo(appid: str | int=None, cache_path: str|None=None, cache: dict|
             from qimai_cls import get_app_baseinfo
             cache = get_app_baseinfo(str(appid))
             assert cache, "Failed to fetch app info from qimai."
+    # wrappers
+    if 'bundle_id' not in cache:
+        result = query_ipa(appid, os.path.dirname(cache_path))
+        if result:
+            cache['bundle_id'] = result[0]
+        else:
+            logger.warning(f"Failed to fetch bundle id from ipa for {appid}.")
+            cache['bundle_id'] = str(appid)
     if cache_path and isinstance(cache_path, str):
         os.makedirs(os.path.dirname(cache_path), exist_ok=True)
         with open(cache_path, 'w', encoding='utf-8') as f:
@@ -118,5 +126,8 @@ def query_appid_by_ident(name: str, cache_path: str|None=None, cache: int|None=N
 
 
 if __name__ == '__main__':
-    pass
+    query_ipa('', './cached/')
+    print(len(CACHED_IPA))
+    #print('\n'.join(map(str, [app['bundle_id'] for app in CACHED_IPA if any(k in app['path'] for k in ['/CA', '/CA_2', '/CA_3'])])))
+    print('\n'.join(map(str, [app['bundle_id'] for app in CACHED_IPA if any(k in app['path'] for k in ['/benign'])])))
 

@@ -1,0 +1,6 @@
+{
+    "name": "HUGVIR Exchange",
+    "category": "工具",
+    "description": "You can use an application to calculate the exchange rates of various countries' currencies, obtain the price of the desired currency by entering the corresponding amount, and also use this application to parse the required domain name",
+    "bundle_id": "com.hugvir.tool"
+}

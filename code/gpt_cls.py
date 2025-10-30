@@ -330,6 +330,14 @@ class TriggerField(BaseModel):
     )
 
 class TriggerResponse(BaseModel):
+    analysis_metadata: str = Field(
+        ...,
+        description="Systematically analyze the provided app metadata (app profile, user reviews) to find any suspicious traces. (As much detail as possible)"
+    )
+    analysis_similarity: str = Field(
+        ...,
+        description="Systematically analyze whether this app is similar to existing patterns in any of bundle id, name, description, app profile, user reviews. (As much detail as possible)"
+    )
     is_mask_package: Literal['Yes', 'No', 'Unable to determine'] = Field(
         ...,
         description=(
@@ -418,7 +426,7 @@ class GPTClient:
                             "from those described in the app store. Based on provided appstore metadata, screenshots, and user comments, perform the following:\n\n"
                             
                             "Step 1: Determine whether the app is disguised:\n"
-                            "- Answer 'Yes' if evidence clearly indicates hidden functionalities (e.g., mismatch between described and actual functions, user comments mentioning triggers, required input phrases, or unusual app behaviors).\n"
+                            "- Answer 'Yes' if evidence clearly indicates hidden functionalities (e.g., mismatch between described and actual functions, user comments mentioning triggers, required input phrases, bundle id domain/app profile similar to known exemplars, or unusual app behaviors).\n"
                             "- Answer 'No' if the app functions exactly as described, with no discrepancies or user-reported anomalies.\n"
                             "- Answer 'Unable to determine' if evidence is ambiguous, insufficient, or obscured by unrelated marketing/promotional elements.\n\n"
                             
@@ -429,7 +437,7 @@ class GPTClient:
                             "Step 4: Clearly identify trigger probabilities:\n"
                             "- Open app trigger ([1]): App transforms automatically after opening, multiple openings, or after waiting (e.g., '重启自动变身', '打开后等10秒').\n"
                             "- Condition-based trigger ([2]): Requires specific geographic location or time conditions (e.g., '凌晨打开', '中国地区', '关闭VPN').\n"
-                            "- Operation-based trigger ([3]): Requires specific user interaction, like repeated clicks or watching ads (e.g., '连续点击5次', '点击空白10下').\n"
+                            "- Operation-based trigger ([3]): Requires specific user interaction, like repeated clicks or watching ads (e.g., '连续点击5次', '点击空白10下', '点击图标3次').\n"
                             "- Text-based trigger ([4]): Requires entering specific text in designated fields (e.g., '问题反馈输入666', '建议反馈输入5201080').\n\n"
 
                             "Provide a confidence (0.0–1.0) for each trigger type. Multiple trigger methods can coexist.\n\n"
@@ -452,6 +460,9 @@ class GPTClient:
 
                             "Example [Clicking locations - click donuts 5 times]:\n"
                             "[['点击', '点击5次'], ['甜甜圈', '一直点'], ['打开', '打开']]\n\n"
+
+                            "Example [Clicking locations - click chat icon 3 times]:\n"
+                            "[['点击', '点三下'], ['聊天', '聊天'], ['一直点', '一直点'], ['右上角', '聊天']]\n\n"
                             
                             "Example [Specific text input trigger - two 5201080 or 666 possible]:\n"
                             "[['求暗号', '打不开'], ['口令', '五二0零八零 数字'], ['口令', '5⃣️2⃣️o1⃣️o8⃣️o'], ['提交完进不去啊', '口令，我爱零你零八零'], ['666', '666'], ['太良心的软件 孩子很喜欢！！！！', '太好用了 孩子很喜欢520！！！！我真的会爱上1080遍！！！！'], ['666', '666']]\n\n"
@@ -462,10 +473,79 @@ class GPTClient:
                             "Example [Spatiotemporal conditions - in China with VPN off]:\n"
                             "[['无广子', '关闭 V*N'], ['定位中国', '定位中国'], ['打不开', '允许连接网络权限']]\n\n"
 
+                            "Example [Submit text in feedback - 777ys]:\n"
+                            "Name: 追击点数\n"
+                            "Bundle ID: com.xingqi.fenh.dice (same family or template reuse)\n\n"
+
                             "Example text input triggers: 666, ys777, 大耳朵图图, 大马猴, 你好123, 变美要自信, 我爱中国, 999999, 5201080, 小柿子, 蒙太奇, 和气生财, 好运家, 龙年大吉, 八方来财, 鸭梨鸭梨, 继续加油, 新年快乐, 好久不见, 完美工具, c1, c7, and so on.\n"
                             
+"\n\nAdditional EXEMPLARS:\n"
+"""
+{"name":"变色找找看","bundleid":"com.jide.jide.bianse","method_family":"submit_text","ui_entry":"首页·意见反馈","keyword":"小柿子","aux_actions":[],"confidence":0.93,"evidence":["‘意见反馈写小柿子就可以看’","‘填小柿子没用啊’"]}
+{"name":"柠檬猜色（极速版）","bundleid":"com.oese.lcnglu.mosor","method_family":"submit_text","ui_entry":"我的→给点建议","keyword":"小柿子","aux_actions":[],"confidence":0.86,"evidence":["多条‘小柿子’短评","‘怎么变身’求助"]}
+{"name":"极速找形","bundleid":"com.jide.jide.xingzhuang","method_family":"submit_text","ui_entry":"首页·问题反馈","keyword":"小柠檬","aux_actions":[],"confidence":0.9,"evidence":["‘小柠檬没反应’","‘怎么提交意见反馈’"]}
+{"name":"方阵成语","bundleid":"com.wxj.zyzs.chengyu","method_family":"submit_text","ui_entry":"问题反馈","keyword":"小柠檬","aux_actions":[],"confidence":0.91,"evidence":["‘激活暗号小柠檬’","‘小柠檬用不了啊’"]}
+{"name":"变美小帮手","bundleid":"app.kan.bianmei","method_family":"submit_text","ui_entry":"设置→反馈意见","keyword":"变美要自信","aux_actions":[],"confidence":0.88,"evidence":["多条‘变美要自信’","‘点提交没反应/广告多’"]}
+{"name":"美味直达","bundleid":"com.food.radar","method_family":"submit_text","ui_entry":"首页搜索栏","keyword":"黄龙痛饮","aux_actions":["press_search"],"confidence":0.84,"evidence":["‘口令没用/没反应’","‘输入后404 loading’"]}
+{"name":"Full Record - Recording tools","bundleid":"tools.matter.me","method_family":"submit_text","ui_entry":"“+”新建→标题/内容","keyword":"完美工具","aux_actions":["restart_many_times"],"confidence":0.87,"evidence":["‘完美工具很好用’","‘要多试几次/黑屏/投屏问题’"]}
+{"name":"小幸运收藏","bundleid":"com.wucheng.LuckyMoment","method_family":"submit_text","ui_entry":"首页添加→第一栏","keyword":"幸运","aux_actions":["save"],"confidence":0.6,"evidence":["无显著短评，仅流程描述"]}
+{"name":"心口默默算","bundleid":"com.feige.com.xink","method_family":"submit_text","ui_entry":"首页·提交建议","keyword":"5201080","aux_actions":[],"confidence":0.92,"evidence":["‘口令：5201080’直述","‘提交完进不去/网络错误’"]}
+{"name":"旧车新生","bundleid":"com.Match.Motor","method_family":"submit_text","ui_entry":"搜索框","keyword":"龙腾虎跃","aux_actions":["press_enter"],"confidence":0.86,"evidence":["‘现在是龙腾虎跃’","‘求暗号/打不开’"]}
+{"name":"高质家政","bundleid":"com.elite.HomeApp","method_family":"submit_text","ui_entry":"搜索栏","keyword":"当日口令(如龙威虎震/龙举云兴等)","aux_actions":["press_search"],"confidence":0.84,"evidence":["‘今日口令是什么’密集","多条具体口令被点名"]}
+{"name":"微光-人人都是主题设计师","bundleid":"cn.onedayapp.onedayNovelVip","method_family":"submit_text","ui_entry":"我的→帮助反馈→意见反馈","keyword":"我爱中国","aux_actions":["restart_app"],"confidence":0.9,"evidence":["‘我爱中国’多次出现","‘隐藏模式/广告时间’讨论"]}
+{"name":"行票易记","bundleid":"com.pz.xz.piao","method_family":"submit_text","ui_entry":"右上角！","keyword":"小柿子","aux_actions":["reopen_after_crash"],"confidence":0.85,"evidence":["多条‘小柿子’","‘闪退/打不开’共现"]}
+{"name":"智棋计时","bundleid":"com.ybspace.kateworld.qibang","method_family":"submit_text","ui_entry":"底部·问题反馈弹窗","keyword":"777ys","aux_actions":["reopen_after_crash"],"confidence":0.91,"evidence":["‘进去点问题反馈 777ys 就可以了’","多条‘777ys’确认"]}
+{"name":"发艺简约","bundleid":"com.nuode.isteward.fayue","method_family":"submit_text","ui_entry":"首页·问题反馈","keyword":"777ys","aux_actions":[],"confidence":0.82,"evidence":["‘777ys.pro’提及","‘骗子/片源下架’两极评价"]}
+{"name":"快降夺冠","bundleid":"com.feige.com.diaoyuan","method_family":"submit_text","ui_entry":"问题反馈","keyword":"777ys","aux_actions":[],"confidence":0.83,"evidence":["‘问题反馈无法输入’","‘追剧神器’正向回声"]}
+{"name":"黄瓜视频线索组","bundleid":"me.RampExteriorWall.app","method_family":"clipboard_text","ui_entry":"首次启动→允许粘贴","keyword":"剪贴板命中特定串(如“黄瓜视频”或同批密文)","aux_actions":[],"confidence":0.78,"evidence":["评论点名‘黄瓜视频’与粘贴权限"]}
+{"name":"Quantusimu","bundleid":"com.QQjruheLo.NTC","method_family":"clipboard_text","ui_entry":"首次启动→允许粘贴→获取最新版本","keyword":"长串密文+代码=BGZ0853","aux_actions":["wait_loading"],"confidence":0.8,"evidence":["一致‘更新卡0%/需切换网络’反馈"]}
+{"name":"EvacuationWidth","bundleid":"com.EvacuationWidth.SanShu","method_family":"clipboard_text","ui_entry":"首次启动→允许粘贴→获取最新版本","keyword":"#iPhone#…代码=BGZ0853","aux_actions":["wait_loading"],"confidence":0.8,"evidence":["与Quantusimu同模板·同抱怨"]}
+{"name":"正旋压降计算","bundleid":"com.zongde.chaolai","method_family":"clicks_plus_text","ui_entry":"计算→输入框1","keyword":"999999","aux_actions":["click_3_times"],"confidence":0.72,"evidence":["‘999999+计算3次’指引","评论多为广告/关不掉"]}
+{"name":"加班调休阁","bundleid":"com.example.overtimeRecord","method_family":"clicks_plus_text","ui_entry":"请假→标题","keyword":"999999","aux_actions":["click_n_times"],"confidence":0.8,"evidence":["‘请假标题6个9点添加记录即可’","‘广告关不掉/闪退’"]}
+{"name":"水电气综合记录表","bundleid":"com.example.surfaceManager","method_family":"clicks_plus_text","ui_entry":"水表→添加记录→表记读数","keyword":"999999","aux_actions":["click_3_times","save"],"confidence":0.78,"evidence":["示例族‘999999+点击’","评论指向广告/投诉"]}
+{"name":"山茶录","bundleid":"com.example.pinChaMan","method_family":"clicks_plus_text","ui_entry":"右下角＋→茶名","keyword":"999999","aux_actions":["click_3_times","add"],"confidence":0.75,"evidence":["同家族触发语义","有‘横屏反向/输入法问题’反馈"]}
+{"name":"交织钱保宝","bundleid":"com.example.walletManager","method_family":"submit_text","ui_entry":"右下角＋→交易名/金额","keyword":"999999","aux_actions":["add"],"confidence":0.76,"evidence":["‘999999后添加交易’说明","‘横屏只支持一侧’反馈"]}
+{"name":"四叶运动手册","bundleid":"com.example.runShengccai","method_family":"submit_text","ui_entry":"锻炼→＋→三处输入","keyword":"999999","aux_actions":["add","restart_app"],"confidence":0.77,"evidence":["‘添加后提示激活成功重启’","评论多为‘广告/诱导订购’"]}
+{"name":"好记性密码管理","bundleid":"com.exa.passwordTool","method_family":"clicks_plus_text","ui_entry":"添加新密码→ServiceName","keyword":"222222","aux_actions":["click_3_times","restart_app"],"confidence":0.8,"evidence":["‘投屏失效/广告关不掉’","‘显示无网络’与激活后语境匹配"]}
+{"name":"马松阁","bundleid":"com.berlari.tool","method_family":"clicks_plus_text","ui_entry":"设置→反馈内容","keyword":"222222","aux_actions":["click_3_times"],"confidence":0.73,"evidence":["‘白屏/连不上网’与触发后状态同现"]}
+{"name":"铜排电路多样计算","bundleid":"com.jingchao.tanhui","method_family":"clicks_plus_text","ui_entry":"计算→铜排载流量→第1框","keyword":"999999","aux_actions":["click_3_times","restart_app"],"confidence":0.79,"evidence":["‘广告关不掉/横屏方向反了’","与触发后界面一致的抱怨"]}
+{"name":"工况/筒径流量求知","bundleid":"com.deshi.qingchu","method_family":"clicks_plus_text","ui_entry":"标准工况流量计算→第1框","keyword":"999999","aux_actions":["click_3_times","restart_app"],"confidence":0.78,"evidence":["多条‘666’保护/刷屏","并有‘看广告/诈骗’投诉"]}
+{"name":"土壤洞察向导","bundleid":"com.mudi.land","method_family":"clicks_plus_text","ui_entry":"对流换热系数→第1框","keyword":"999999","aux_actions":["click_3_times","restart_app"],"confidence":0.77,"evidence":["‘出现激活成功重启’描述","评论‘纯看广告’与之同批"]}
+{"name":"微工具：剪贴板批","bundleid":"com.MYDETAR.www","method_family":"clipboard_text","ui_entry":"首次启动→允许粘贴","keyword":"批量密文/口令(同批)","aux_actions":["toggle_airplane_mode_if_stuck"],"confidence":0.7,"evidence":["‘停在获取最新版本’","‘飞行模式切换可缓解’"]}
+{"name":"AI剧影小帮手","bundleid":"jiuxon.com.ShijuAiCoperAssiant","method_family":"submit_text","ui_entry":"首页空白栏→输入后点AI帮手","keyword":"壳儿","aux_actions":["reenter_app"],"confidence":0.62,"evidence":["少量‘广告关不掉/投屏项’","口令提示较弱，保守标注"]}
+{"name":"印章-文件盖章生成器与管理器","bundleid":"Aoxin.yinzhang.com","method_family":"submit_text","ui_entry":"三条杠→意见反馈","keyword":"和气生财","aux_actions":[],"confidence":0.85,"evidence":["多条‘和气生财/龙年大吉’短评","‘必须看广告’与触发后体验一致"]}
+
+
+POSSIBLE RELATIONS (BUNDLE ID SUBDOMAIN => TRANSFORMATION METHOD: KEYWORDS TO INPUT):
+zw.sz => 小柠檬
+yunti.zzm => 666
+qiu.okw.opg => 666
+kj.wenz => 小柠檬
+hy.buto => 小柿子
+com.example => 999999+点击
+dz.spd => 小柿子
+ddy.shuziMiaowen => 皮皮真不错|野原新之助
+cz.dbi => 777ys
+com.xingqi.fenh => 777ys
+com.pz.xz => 888
+com.cor.zx => xyz|mmm
+birdcard.cai => 爱其意
+
+
+ADDITIONAL COMPACT DECISION SCHEMA:
+If reviews show “feedback/problem/contact” + an exact repeated word/phrase → method=submit-text (or method=searchbar-submit if “search bar” is explicit); keyword=that phrase; add post_action=restart or auto_crash_then_reopen when stated.
+If “clipboard/allow paste/代码/#iPhone#” → method=clipboard-text; token=given long code; preconditions: allow paste + network; often reopen.
+If instructions mention “click N times” after entering a number → method=submit-text + repeat-clicks; keyword=digits; clicks=N; post_action=restart.
+If both selecting an option and typing a word are required → method=select-option + submit-text; include option + keyword.
+Add preconditions if reviews/descriptions mention network permission or a time window.
+If only generic negatives (ads/white screen) and no concrete keyword/path → no trigger inferred.
+"""
+"\n\n"
+
                             #"Only infer a text input trigger if multiple comments explicitly repeat the same unusual phrase or number sequence.\n"
                             "Positively infer a text input trigger if comments indicate unusually repeating phrases or number sequences, that is abrupt or similar to known examples.\n"
+                            "Positively infer operation-based trigger if comments indicate suspicious click operations, such as clicking on a specific icon multiple times.\n"
+                            "Similar BundleID / Domain Strings / App Theme may share the same keyword-based transformation method as examples. Positively suggest them if no other method is found.\n"
                             "Clearly specify any uncertainties by marking fields as 'None' if not confidently determined.\n\n"
 
                             "Ensure all provided examples guide your inference clearly and accurately. Do not deviate from the output schema or include unsupported assumptions."
@@ -483,6 +563,7 @@ class GPTClient:
                     {
                         "type": "text",
                         "text": 
+                            f"bundle id: {appstore_info['bundle_id']}\n" +
                             f"name: {appstore_info['name']}\n" + 
                             f"category: {appstore_info['category']}\n" + 
                             f"description: {appstore_info['description']}\n\n"

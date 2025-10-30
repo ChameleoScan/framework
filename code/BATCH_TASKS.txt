@@ -1,3 +1,4 @@
-com.BuiVanBientieu.TranquilAngler
-com.elite.HomeApp
-com.ROAS.Wizard
+com.hugvir.tool
+com.shuli.hua.tud
+com.FlowCharacteristicConductivity
+com.qiu.okw.opg.yimiao

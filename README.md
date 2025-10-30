@@ -52,7 +52,7 @@
 
 1. **Install** **Cydia** and **AppSync** to install decrypted IPA files. (Or **login** your **Apple ID** instead.)
 
-2. **Install** **OpenSSH** tweak, **Frida** tweak and **ZXTouch** tweak (formerly **IOS13-SimulateTouch**).
+2. **Install** **OpenSSH**, **Frida**, **AFC2**, and **ZXTouch** tweaks (formerly **IOS13-SimulateTouch**).
 3. **Build and deploy** **WebAgentDriver** (as **Appium XCUITest Driver**).
 4. **Connect** it to the **Host** **PC**.
 
