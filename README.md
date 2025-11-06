@@ -71,7 +71,7 @@
 
 #### Running the framework
 
-1. Put your **IPA file** ```bundle_id-version-appid-0.ipa```, **app store metadata** ```bundle_id.json``` (name, category, description) and **user reviews** ```bundle_id.comments.json``` into the ```cached``` directory (see examples).
+1. Put your **IPA file** ```bundleid-version-appid-0.ipa``` (same format as ```ipatool-py```), **app store metadata** ```bundleid.json``` (name, category, description) and **user reviews** ```bundleid.comments.json``` into the ```cached``` directory (see examples).
 
 2. Put **Bundle IDs** into ```BATCH_TASKS.txt```.
 3. **Run** ```appium.bat```, ```tiproxy.bat```, ```xcuitest.bat``` or you may manually launch these services.
