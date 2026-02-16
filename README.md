@@ -1,16 +1,32 @@
 # ChameleoScan
 
-
+This repository contains the source code of ChameleoScan proposed in our paper:
 
 ## Our paper
 
-**ChameleoScan: Demystifying and Detecting iOS Chameleon Apps via LLM-Powered UI Exploration**
+**ChameleoScan: Demystifying and Detecting iOS Chameleon Apps via LLM-Powered UI Exploration** (NDSS 2026, DOI: 10.14722/ndss.2026.241906)
 
+Available at [NDSS 2026 official site](https://www.ndss-symposium.org/ndss-paper/chameleoscan-demystifying-and-detecting-ios-chameleon-apps-via-llm-powered-ui-exploration/).
 
+```bibtex
+@inproceedings{chameleoscan,
+  title     = {{CHAMELEOSCAN: Demystifying and Detecting iOS Chameleon Apps via LLM-Powered UI Exploration}},
+  author    = {Lin, Hongyu and Hu, Yicheng and Xu, Haitao and Lu, Yanchen and Ren, Mengxia and Hao, Shuai and Yue, Chuan and Li, Zhao and Zhang, Fan and Jiang, Yixin},
+  booktitle = {Proceedings of the 33rd Network and Distributed System Security Symposium (NDSS 2026)},
+  year      = {2026},
+  doi       = {10.14722/ndss.2026.241906},
+}
+```
 
 ## Abstract
 
-...
+Chameleon apps evade iOS App Store review by presenting legitimate  functionality during submission while transforming into illicit variants post-installation. While prevalent, their underlying transformation  methods and developer-user collusion dynamics remain poorly understood.  Existing detection approaches, constrained by static analysis or  metadata dependencies, prove ineffective against hybrid implementations, novel variants, or metadata-scarce instances. To address these  limitations, we establish a curated dataset of 500 iOS Chameleon apps  collected through covert distribution channels, enabling systematic  identification of 10 categories of distinct transformation patterns  (including 4 previously undocumented variants). Building upon these  findings, we present ChameleoScan, the first LLM-driven automated UI  exploration framework for reliable Chameleon app verification. The  system maintains local decision interpretability while ensuring global  detection consistency through its core innovation - predictive metadata  analytics, semantic interface comprehension, and human-comparable  interaction strategies. Comprehensive evaluation on 1,644 iOS apps  demonstrates operational efficacy (9.85% detection rate, 92.59%  precision), with findings formally acknowledged by Apple. Implementation and datasets are available at https://github.com/ChameleoScan.
+
+
+
+## Design
+
+![Framework design figure](./assets/design.jpg)
 
 
 
